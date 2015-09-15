@@ -127,27 +127,51 @@ CosmicEvo.prototype.svgScroll = function(scrollDiff, direction) {
   if (scrollDiff > 0) {
     for (var i = 0; i < this.svgMoveables.length; i++) {
     
-      this.timing = this.timing + (scrollDiff * direction);
-    
       var preTiming = null, nextTiming = null;
+      var firstTiming = false, lastTiming = false;
       for (var j = 0; j < this.svgMoveables[i].timing.length; j++) {
         if (this.svgMoveables[i].timing[j].t <= this.timing) {
-          preTiming = this.svgMoveables[i].timing[j].t;
+          preTiming = this.svgMoveables[i].timing[j];
         }
         if (this.svgMoveables[i].timing[j].t >= this.timing) {
-          nextTiming = this.svgMoveables[i].timing[j].t;
+          nextTiming = this.svgMoveables[i].timing[j];
+          if (preTiming !== null || preTiming.t == nextTiming.t) {
+            preTiming = this.svgMoveables[i].timing[j-1];
+          }
         }
       }
+      if (nextTiming === null) {
+        preTiming = this.svgMoveables[i].timing[this.svgMoveables[i].timing.length-2];
+        nextTiming = this.svgMoveables[i].timing[this.svgMoveables[i].timing.length-1];
+      }
+      if (nextTiming.t == this.svgMoveables[i].timing[this.svgMoveables[i].timing.length-1].t) 
+        lastTiming = true;
+      if (preTiming === null) {
+        preTiming = this.svgMoveables[i].timing[0];
+        nextTiming = this.svgMoveables[i].timing[1];
+      }
+      if (preTiming.t == this.svgMoveables[i].timing[0].t) 
+        firstTiming = true;
       
-      if (this.timing >= preTiming && this.timing <= nextTiming) {
-        var newTiming = this.timing + scrollDiff * direction;
-        if (newTiming > nextTiming) {
-          scrollDiff -= nexTiming - preTiming;
-        } else if (newTiming < preTiming) {
-          scrollDiff -= preTiming - newTiming;
+      if ((this.timing >= preTiming.t && direction > 0 && this.timing <= nextTiming.t) ||
+          (this.timing > preTiming.t && this.timing < nextTiming.t) ||
+          (this.timing >= preTiming.t && this.timing <= nextTiming.t && direction < 0)) {
+        
+        var newTiming = Math.round(
+          this.timing + direction * ((1 / (nextTiming.y - preTiming.y)) * (scrollDiff / this.svgScale)) * (nextTiming.t - preTiming.t)
+        );
+        if (newTiming > nextTiming.t) {
+          newTiming = nextTiming.t;
+        } else if (newTiming < preTiming.t) {
+          newTiming = preTiming.t;
         }
-        console.log(newTiming, scrollDiff);
-        this.svgMoveables[i].elem.css("top", parseInt(this.svgMoveables[i].elem.css("top")) + scrollDiff * direction);
+
+        var newDistanceY = Math.round(
+          ((1 / (nextTiming.t - preTiming.t)) * (newTiming - this.timing)) * this.svgScale * (nextTiming.y - preTiming.y)
+        );
+        this.svgMoveables[i].elem.css("top", parseInt(this.svgMoveables[i].elem.css("top").replace("px", "")) + newDistanceY);
+
+        this.timing = newTiming;
       }
     }
   }
