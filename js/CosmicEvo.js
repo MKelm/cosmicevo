@@ -38,7 +38,12 @@ CosmicEvo.prototype.initSvgConf = function() {
       "name" : "char1",
       "id" : "char1",
       "x" : 1000 / 3 - 50, "y" : 250,
-      "width" : 100, "height" : 100
+      "width" : 100, "height" : 100,
+      "moveable" : true,
+      "timing" : [
+        { "t" : 0, "x" : 1000 / 2 - 50, "y" : 250 },
+        { "t" : 1000, "x" : 1000 / 2 - 200, "y" : 500 },
+      ]
     },
     {
       "name" : "char1",
@@ -48,7 +53,7 @@ CosmicEvo.prototype.initSvgConf = function() {
       "moveable" : true,
       "timing" : [
         { "t" : 0, "x" : 1000 / 2 - 50, "y" : 250 },
-        { "t" : 500, "x" : 1000 / 2 - 50, "y" : 500 },
+        { "t" : 500, "x" : 1000 / 2 - 200, "y" : 500 },
       ]
     },
     {
@@ -163,8 +168,12 @@ CosmicEvo.prototype.svgScroll = function(scrollDiff, direction) {
           (this.timing > preTiming.t && this.timing < nextTiming.t) ||
           (this.timing >= preTiming.t && this.timing <= nextTiming.t && direction < 0)) {
         
+        var d = Math.sqrt(
+          Math.pow(nextTiming.y - preTiming.y, 2) + Math.pow(nextTiming.x - preTiming.x, 2)
+        );
+        
         var newTiming = Math.round(
-          this.timing + direction * ((1 / (nextTiming.y - preTiming.y)) * (scrollDiff / this.svgScale)) * (nextTiming.t - preTiming.t)
+          this.timing + direction * ((1 / d) * (scrollDiff / this.svgScale)) * (nextTiming.t - preTiming.t)
         );
         if (newTiming > nextTiming.t) {
           newTiming = nextTiming.t;
@@ -176,6 +185,11 @@ CosmicEvo.prototype.svgScroll = function(scrollDiff, direction) {
           ((1 / (nextTiming.t - preTiming.t)) * (newTiming - this.timing)) * this.svgScale * (nextTiming.y - preTiming.y)
         );
         this.svgMoveables[i].elem.css("top", parseInt(this.svgMoveables[i].elem.css("top").replace("px", "")) + newDistanceY);
+        
+        var newDistanceX = Math.round(
+          ((1 / (nextTiming.t - preTiming.t)) * (newTiming - this.timing)) * this.svgScale * (nextTiming.x - preTiming.x)
+        );
+        this.svgMoveables[i].elem.css("left", parseInt(this.svgMoveables[i].elem.css("left").replace("px", "")) + newDistanceX);
 
         this.timing = newTiming;
       }
