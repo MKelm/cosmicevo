@@ -29,6 +29,12 @@ CosmicEvo.prototype.initSvgConf = function() {
       "background" : true
     },
     {
+      "name" : "logo1",
+      "id" : "logo1",
+      "x" : 10, "y" : 10,
+      "width" : 200, "height" : 200
+    },
+    {
       "name" : "char1",
       "id" : "char1",
       "x" : 1000 / 3 - 50, "y" : 250,
