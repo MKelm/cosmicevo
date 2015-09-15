@@ -1,5 +1,8 @@
 CosmicEvo = function() {
-  this.svgConf = [];
+  $.ajaxSetup( { "async": false } );
+  var locationPath = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/')+1);  
+  this.svgConf = $.getJSON(locationPath + 'data/svg.conf.json').responseJSON;
+  
   this.scrollBarSize = { width: 0, height: 0 };
   this.svgScale = 1;
   this.svgMoveables = [];
@@ -17,52 +20,6 @@ CosmicEvo.prototype.detectScrollBarSize = function() {
   this.scrollBarSize.height = scrollDiv.offsetHeight - scrollDiv.clientHeight;
   
   document.body.removeChild(scrollDiv);
-};
-
-CosmicEvo.prototype.initSvgConf = function() {
-  this.svgConf = [
-    {
-      "name" : "test1",
-      "id" : "test1",
-      "x" : 0, "y" : 0,
-      "width" : 1000, "height" : 7000,
-      "background" : true
-    },
-    {
-      "name" : "logo1",
-      "id" : "logo1",
-      "x" : 10, "y" : 10,
-      "width" : 200, "height" : 200
-    },
-    {
-      "name" : "char1",
-      "id" : "char1",
-      "x" : 1000 / 3 - 50, "y" : 250,
-      "width" : 100, "height" : 100,
-      "moveable" : true,
-      "timing" : [
-        { "t" : 0, "x" : 1000 / 2 - 50, "y" : 250 },
-        { "t" : 1000, "x" : 1000 / 2 - 200, "y" : 500 },
-      ]
-    },
-    {
-      "name" : "char1",
-      "id" : "char2",
-      "x" : 1000 / 2 - 50, "y" : 250,
-      "width" : 100, "height" : 100,
-      "moveable" : true,
-      "timing" : [
-        { "t" : 0, "x" : 1000 / 2 - 50, "y" : 250 },
-        { "t" : 500, "x" : 1000 / 2 - 200, "y" : 500 },
-      ]
-    },
-    {
-      "name" : "char1",
-      "id" : "char3",
-      "x" : 1000 / 1.5 - 50, "y" : 250,
-      "width" : 100, "height" : 100
-    }
-  ];
 };
 
 CosmicEvo.prototype.setSvgs = function() {
@@ -219,7 +176,6 @@ CosmicEvo.prototype.registerScrollHandler = function() {
 $(function(){
   var ce = new CosmicEvo();
   ce.detectScrollBarSize();
-  ce.initSvgConf();
   ce.setSvgs();
   ce.registerScrollHandler();
 });
