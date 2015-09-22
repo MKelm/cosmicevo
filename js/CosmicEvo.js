@@ -1,25 +1,34 @@
 CosmicEvo = function() {
   $.ajaxSetup( { "async": false } );
-  var locationPath = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/')+1);  
+  var locationPath = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/')+1);
   this.svgConf = $.getJSON(locationPath + 'data/svg.conf.json').responseJSON;
-  
+
   this.scrollBarSize = { width: 0, height: 0 };
   this.svgScale = 1;
   this.svgMoveables = [];
+
   this.timing = 0;
+  this.getCurrentTiming();
 };
 
 CosmicEvo.prototype.constructor = CosmicEvo;
 
-CosmicEvo.prototype.detectScrollBarSize = function() {
-  var scrollDiv = document.createElement("div");
-  scrollDiv.className = "scrollbar-measure";
-  document.body.appendChild(scrollDiv);
+CosmicEvo.prototype.getCurrentTiming = function() {
+  var scope = this;
+  $(window).one('scroll', function() {
+    scope.timing = $(this).scrollTop() / scope.svgScale;
+    console.log(scope.timing, $(this).scrollTop(), scope.svgScale);
+    scope.svgScroll(scope.timing * scope.svgScale, 1);
+  });
+};
 
-  this.scrollBarSize.width = scrollDiv.offsetWidth - scrollDiv.clientWidth;
-  this.scrollBarSize.height = scrollDiv.offsetHeight - scrollDiv.clientHeight;
-  
-  document.body.removeChild(scrollDiv);
+CosmicEvo.prototype.detectScrollBarSize = function() {
+  var scrollDiv = $("<div></div>");
+  scrollDiv.addClass("scrollbar-measure");
+  $("body").append(scrollDiv);
+  this.scrollBarSize.width = scrollDiv[0].offsetWidth - scrollDiv[0].clientWidth;
+  this.scrollBarSize.height = scrollDiv[0].offsetHeight - scrollDiv[0].clientHeight;
+  $(".scrollbar-measure").remove();
 };
 
 CosmicEvo.prototype.setSvgs = function() {
@@ -40,7 +49,7 @@ CosmicEvo.prototype.setSvgs = function() {
       var h = svg.attr('height').replace('px', '');
       var wI = parseInt(w);
       var hI = parseInt(h);
-      
+
       if (wI < hI) {
         var wN = wI + ($(window).width() - wI);
         var sP = (1 / wI) * wN;
@@ -68,14 +77,14 @@ CosmicEvo.prototype.setSvgs = function() {
         var h = svg.attr('height').replace('px', '');
         this.svgScale = (1 / h) * hN;
       }
-      
+
       svg.attr({
         width: wI,
         height: hI,
         viewBox: [0, 0, w, h].join(' '),
         preserveAspectRatio: 'xMidYMid meet'
       });
-      
+
     } else {
       var svg = $("#"+this.svgConf[i].id);
       var w = svg.attr('width').replace('px', '');
@@ -93,10 +102,10 @@ CosmicEvo.prototype.setSvgs = function() {
 
 CosmicEvo.prototype.svgScroll = function(scrollDiff, direction) {
   if (scrollDiff > 0) {
+    var newTiming = -1;
     for (var i = 0; i < this.svgMoveables.length; i++) {
-    
+
       var preTiming = null, nextTiming = null;
-      var firstTiming = false, lastTiming = false;
       if (direction > 0) { // forward
         for (var j = 0; j < this.svgMoveables[i].timing.length - 1; j++) {
           if (this.svgMoveables[i].timing[j].t <= this.timing && this.svgMoveables[i].timing[j+1].t > this.timing) {
@@ -116,24 +125,19 @@ CosmicEvo.prototype.svgScroll = function(scrollDiff, direction) {
       }
 
       if (preTiming !== null && nextTiming !== null) {
-        if (nextTiming.t == this.svgMoveables[i].timing[this.svgMoveables[i].timing.length-1].t) 
-          lastTiming = true;
-        if (preTiming === null) {
-          preTiming = this.svgMoveables[i].timing[0];
-          nextTiming = this.svgMoveables[i].timing[1];
+        if (i == 1) {
+          console.log(this.timing, preTiming.t, nextTiming.t);
         }
-        if (preTiming.t == this.svgMoveables[i].timing[0].t) 
-          firstTiming = true;
-        
+
         if ((this.timing >= preTiming.t && direction > 0 && this.timing <= nextTiming.t) ||
             (this.timing > preTiming.t && this.timing < nextTiming.t) ||
             (this.timing >= preTiming.t && this.timing <= nextTiming.t && direction < 0)) {
-          
+
           var d = Math.sqrt(
             Math.pow(nextTiming.y - preTiming.y, 2) + Math.pow(nextTiming.x - preTiming.x, 2)
           );
-          
-          var newTiming = Math.round(
+
+          newTiming = Math.round(
             this.timing + direction * ((1 / d) * (scrollDiff / this.svgScale)) * (nextTiming.t - preTiming.t)
           );
           if (newTiming > nextTiming.t) {
@@ -146,15 +150,16 @@ CosmicEvo.prototype.svgScroll = function(scrollDiff, direction) {
             ((1 / (nextTiming.t - preTiming.t)) * (newTiming - this.timing)) * this.svgScale * (nextTiming.y - preTiming.y)
           );
           this.svgMoveables[i].elem.css("top", parseInt(this.svgMoveables[i].elem.css("top").replace("px", "")) + newDistanceY);
-          
+
           var newDistanceX = Math.round(
             ((1 / (nextTiming.t - preTiming.t)) * (newTiming - this.timing)) * this.svgScale * (nextTiming.x - preTiming.x)
           );
           this.svgMoveables[i].elem.css("left", parseInt(this.svgMoveables[i].elem.css("left").replace("px", "")) + newDistanceX);
-
-          this.timing = newTiming;
         }
       }
+    }
+    if (newTiming > -1) {
+      this.timing = newTiming;
     }
   }
 };
@@ -178,7 +183,7 @@ CosmicEvo.prototype.registerScrollHandler = function() {
 
 };
 
-$(function(){
+$(document).ready(function(){
   var ce = new CosmicEvo();
   ce.detectScrollBarSize();
   ce.setSvgs();
