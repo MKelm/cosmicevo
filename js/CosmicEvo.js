@@ -97,58 +97,63 @@ CosmicEvo.prototype.svgScroll = function(scrollDiff, direction) {
     
       var preTiming = null, nextTiming = null;
       var firstTiming = false, lastTiming = false;
-      for (var j = 0; j < this.svgMoveables[i].timing.length; j++) {
-        if (this.svgMoveables[i].timing[j].t <= this.timing) {
-          preTiming = this.svgMoveables[i].timing[j];
+      if (direction > 0) { // forward
+        for (var j = 0; j < this.svgMoveables[i].timing.length - 1; j++) {
+          if (this.svgMoveables[i].timing[j].t <= this.timing && this.svgMoveables[i].timing[j+1].t > this.timing) {
+            preTiming = this.svgMoveables[i].timing[j];
+            nextTiming = this.svgMoveables[i].timing[j+1];
+            break;
+          }
         }
-        if (this.svgMoveables[i].timing[j].t >= this.timing) {
-          nextTiming = this.svgMoveables[i].timing[j];
-          if (preTiming !== null || preTiming.t == nextTiming.t) {
+      } else { // backward
+        for (var j = this.svgMoveables[i].timing.length - 1; j > 0; j--) {
+          if (this.svgMoveables[i].timing[j].t >= this.timing && this.svgMoveables[i].timing[j-1].t < this.timing) {
             preTiming = this.svgMoveables[i].timing[j-1];
+            nextTiming = this.svgMoveables[i].timing[j];
+            break;
           }
         }
       }
-      if (nextTiming === null) {
-        preTiming = this.svgMoveables[i].timing[this.svgMoveables[i].timing.length-2];
-        nextTiming = this.svgMoveables[i].timing[this.svgMoveables[i].timing.length-1];
-      }
-      if (nextTiming.t == this.svgMoveables[i].timing[this.svgMoveables[i].timing.length-1].t) 
-        lastTiming = true;
-      if (preTiming === null) {
-        preTiming = this.svgMoveables[i].timing[0];
-        nextTiming = this.svgMoveables[i].timing[1];
-      }
-      if (preTiming.t == this.svgMoveables[i].timing[0].t) 
-        firstTiming = true;
-      
-      if ((this.timing >= preTiming.t && direction > 0 && this.timing <= nextTiming.t) ||
-          (this.timing > preTiming.t && this.timing < nextTiming.t) ||
-          (this.timing >= preTiming.t && this.timing <= nextTiming.t && direction < 0)) {
-        
-        var d = Math.sqrt(
-          Math.pow(nextTiming.y - preTiming.y, 2) + Math.pow(nextTiming.x - preTiming.x, 2)
-        );
-        
-        var newTiming = Math.round(
-          this.timing + direction * ((1 / d) * (scrollDiff / this.svgScale)) * (nextTiming.t - preTiming.t)
-        );
-        if (newTiming > nextTiming.t) {
-          newTiming = nextTiming.t;
-        } else if (newTiming < preTiming.t) {
-          newTiming = preTiming.t;
+
+      if (preTiming !== null && nextTiming !== null) {
+        if (nextTiming.t == this.svgMoveables[i].timing[this.svgMoveables[i].timing.length-1].t) 
+          lastTiming = true;
+        if (preTiming === null) {
+          preTiming = this.svgMoveables[i].timing[0];
+          nextTiming = this.svgMoveables[i].timing[1];
         }
-
-        var newDistanceY = Math.round(
-          ((1 / (nextTiming.t - preTiming.t)) * (newTiming - this.timing)) * this.svgScale * (nextTiming.y - preTiming.y)
-        );
-        this.svgMoveables[i].elem.css("top", parseInt(this.svgMoveables[i].elem.css("top").replace("px", "")) + newDistanceY);
+        if (preTiming.t == this.svgMoveables[i].timing[0].t) 
+          firstTiming = true;
         
-        var newDistanceX = Math.round(
-          ((1 / (nextTiming.t - preTiming.t)) * (newTiming - this.timing)) * this.svgScale * (nextTiming.x - preTiming.x)
-        );
-        this.svgMoveables[i].elem.css("left", parseInt(this.svgMoveables[i].elem.css("left").replace("px", "")) + newDistanceX);
+        if ((this.timing >= preTiming.t && direction > 0 && this.timing <= nextTiming.t) ||
+            (this.timing > preTiming.t && this.timing < nextTiming.t) ||
+            (this.timing >= preTiming.t && this.timing <= nextTiming.t && direction < 0)) {
+          
+          var d = Math.sqrt(
+            Math.pow(nextTiming.y - preTiming.y, 2) + Math.pow(nextTiming.x - preTiming.x, 2)
+          );
+          
+          var newTiming = Math.round(
+            this.timing + direction * ((1 / d) * (scrollDiff / this.svgScale)) * (nextTiming.t - preTiming.t)
+          );
+          if (newTiming > nextTiming.t) {
+            newTiming = nextTiming.t;
+          } else if (newTiming < preTiming.t) {
+            newTiming = preTiming.t;
+          }
 
-        this.timing = newTiming;
+          var newDistanceY = Math.round(
+            ((1 / (nextTiming.t - preTiming.t)) * (newTiming - this.timing)) * this.svgScale * (nextTiming.y - preTiming.y)
+          );
+          this.svgMoveables[i].elem.css("top", parseInt(this.svgMoveables[i].elem.css("top").replace("px", "")) + newDistanceY);
+          
+          var newDistanceX = Math.round(
+            ((1 / (nextTiming.t - preTiming.t)) * (newTiming - this.timing)) * this.svgScale * (nextTiming.x - preTiming.x)
+          );
+          this.svgMoveables[i].elem.css("left", parseInt(this.svgMoveables[i].elem.css("left").replace("px", "")) + newDistanceX);
+
+          this.timing = newTiming;
+        }
       }
     }
   }
@@ -159,7 +164,7 @@ CosmicEvo.prototype.registerScrollHandler = function() {
   var scope = this;
   $(window).scroll(function() {
      var nowScrollTop = $(this).scrollTop();
-     if (Math.abs(lastScrollTop - nowScrollTop) >= delta){
+     if (Math.abs(lastScrollTop - nowScrollTop) >= delta) {
        if (nowScrollTop > lastScrollTop) {
          // down
          scope.svgScroll(Math.abs(lastScrollTop - nowScrollTop), 1);
