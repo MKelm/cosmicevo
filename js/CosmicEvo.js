@@ -16,9 +16,9 @@ CosmicEvo.prototype.constructor = CosmicEvo;
 CosmicEvo.prototype.getCurrentTiming = function() {
   var scope = this;
   $(window).one('scroll', function() {
-    scope.timing = $(this).scrollTop() / scope.svgScale;
-    console.log(scope.timing, $(this).scrollTop(), scope.svgScale);
-    scope.svgScroll(scope.timing * scope.svgScale, 1);
+    scope.timing = Math.round($(this).scrollTop() / scope.svgScale);
+    //console.log(scope.timing, $(this).scrollTop(), scope.svgScale);
+    //scope.svgScroll(Math.round(scope.timing * scope.svgScale), 1);
   });
 };
 
@@ -125,7 +125,7 @@ CosmicEvo.prototype.svgScroll = function(scrollDiff, direction) {
       }
 
       if (preTiming !== null && nextTiming !== null) {
-        if (i == 1) {
+        if (i == 0) {
           console.log(this.timing, preTiming.t, nextTiming.t);
         }
 
@@ -133,8 +133,11 @@ CosmicEvo.prototype.svgScroll = function(scrollDiff, direction) {
             (this.timing > preTiming.t && this.timing < nextTiming.t) ||
             (this.timing >= preTiming.t && this.timing <= nextTiming.t && direction < 0)) {
 
-          var d = Math.sqrt(
+          var d = Math.round(Math.sqrt(
             Math.pow(nextTiming.y - preTiming.y, 2) + Math.pow(nextTiming.x - preTiming.x, 2)
+          ));
+          console.log(
+            "distance", d, "timing", this.timing, "dir", direction, "scrollDiff", scrollDiff, "svgScale", this.svgScale, "otp", nextTiming.t, preTiming.t
           );
 
           newTiming = Math.round(
@@ -185,7 +188,7 @@ CosmicEvo.prototype.registerScrollHandler = function() {
 
 $(document).ready(function(){
   var ce = new CosmicEvo();
-  ce.detectScrollBarSize();
   ce.setSvgs();
+  ce.detectScrollBarSize();
   ce.registerScrollHandler();
 });
