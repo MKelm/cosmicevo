@@ -2,6 +2,7 @@ body {
   margin: 0;
   padding: 0;
   background-color: #222;
+  color: #fff;
 }
 
 .scrollbar-measure  {
@@ -10,4 +11,19 @@ body {
 	overflow: scroll;
 	position: absolute;
 	top: -9999px;
+}
+.t1 {
+	position: fixed;
+	top: 50%;
+	right: 0px;
+}
+.t2 {
+	position: absolute;
+	top: 400px;
+	left: 50%;
+}
+.t3 {
+	position: absolute;
+	top: 6000px;
+	left: 50%;
 }
