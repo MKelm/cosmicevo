@@ -12,18 +12,25 @@ body {
 	position: absolute;
 	top: -9999px;
 }
+.s1 {
+	display: block;
+	height: 500px;
+	border-bottom: 1px solid #fff;
+}
 .t1 {
-	position: fixed;
-	top: 50%;
-	right: 0px;
+	display: block;
+	height: 1px;
 }
 .t2 {
-	position: absolute;
-	top: 400px;
-	left: 50%;
+	height: 100px;
+	width: 400px;
+	display: table-cell;
+	vertical-align: middle;
+	text-align: right;
+	color: purple;
 }
 .t3 {
-	position: absolute;
-	top: 6000px;
-	left: 50%;
+	display: block;
+  position: absolute;
+  top: 7000px;
 }
