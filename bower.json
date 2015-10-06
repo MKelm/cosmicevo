@@ -1,0 +1,22 @@
+{
+  "name": "CosmicEvo",
+  "version": "0.0.1",
+  "homepage": "https://github.com/MKelm/cosmicevo",
+  "authors": [
+    "Martin Kelm <martinkelm@shrt.ws>"
+  ],
+  "description": "SVG Scrolling Page",
+  "main": "cosmicevo.html",
+  "license": "CC BY-NC-SA 4.0",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+   "dependencies": {
+    "scrollmagic" : "*"
+  }
+}
