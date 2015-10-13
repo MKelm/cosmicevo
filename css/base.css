@@ -12,25 +12,9 @@ body {
 	position: absolute;
 	top: -9999px;
 }
-.s1 {
-	display: block;
-	height: 500px;
-	border-bottom: 1px solid #fff;
-}
-.t1 {
+.trigger {
+	position: absolute;
 	display: block;
 	height: 1px;
-}
-.t2 {
-	height: 100px;
-	width: 400px;
-	display: table-cell;
-	vertical-align: middle;
-	text-align: right;
-	color: purple;
-}
-.t3 {
-	display: block;
-  position: absolute;
-  top: 7000px;
+	background-color: red;
 }
