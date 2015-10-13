@@ -14,7 +14,12 @@ body {
 }
 .trigger {
 	position: absolute;
+	left: 0;
 	display: block;
 	height: 1px;
 	background-color: red;
+	width: 100%;
+}
+.trigger.green {
+	background-color: green;
 }
