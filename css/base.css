@@ -16,10 +16,10 @@ body {
 	position: absolute;
 	left: 0;
 	display: block;
-	height: 1px;
-	background-color: red;
+	height: 0px;
+	border-bottom: 1px solid red;
 	width: 100%;
 }
-.trigger.green {
-	background-color: green;
+.green {
+	border-bottom: 1px solid green;
 }

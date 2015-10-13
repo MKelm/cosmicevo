@@ -93,12 +93,12 @@ CosmicEvo.prototype.setSvg = function(svg) {
       if (j == 0 || j == svg.timing.length-1) {
         var colorClass = "";
         if (j == 0) {
-          colorClass = " green";
+          colorClass = "green";
         } else {
-          colorClass = " red";
+          colorClass = "red";
         }
         $("body").append('<div class="trigger '+colorClass+'" id="trigger_'+svg.id+'" style="position: absolute; top: '+
-          svg.timing[j].x * this.svgScale +'px">trigger_'+svg.id+'</div>');
+          svg.timing[j].y * this.svgScale +'px">trigger_'+svg.id+'</div>');
       }
     }
   }
@@ -123,10 +123,15 @@ CosmicEvo.prototype.setTweens = function(){
   for (var i = 0; i < this.svgMoveables.length; i++) {
     var ma =  this.svgMoveables[i];
     
+    var duration = 0;
+    for (var j = 1; j < ma.timing.length; j++) {
+      duration += ma.timing[j].y - ma.timing[j-1].y;
+    }
+    
     var scene = new ScrollMagic.Scene({
       trigger: "#trigger_"+ma.svg.id,
-      duration: 1000 * this.svgScale, 
-      offset: ma.svg.y * this.svgScale
+      duration: duration * this.svgScale, 
+      offset: 0
     });
 
     for (var j = 1; j < ma.timing.length; j++) {
