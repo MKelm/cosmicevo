@@ -1,3 +1,4 @@
+/* global ScrollMagic */
 var CosmicEvo = function(controller) {
   $.ajaxSetup( { "async": false } );
   var locationPath = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/')+1);
@@ -46,7 +47,7 @@ CosmicEvo.prototype.detectSvgScale = function() {
     wI = wI * sP;
     hI = hI * sP;
     if (hI > $(window).height()) {
-      wN = wI - this.scrollBarSize.width;
+      wN = wI - scrollBarSize.width;
     }
     this.svgScale = (1 / w) * wN;
   } else {
@@ -56,7 +57,7 @@ CosmicEvo.prototype.detectSvgScale = function() {
     wI = wI * sP;
     hI = hI * sP;
     if (wI > $(window).width()) {
-      hN = hI - this.scrollBarSize.height;
+      hN = hI - scrollBarSize.height;
     }
     this.svgScale = (1 / h) * hN;
   }
@@ -75,7 +76,7 @@ CosmicEvo.prototype.setSvgs = function() {
     );
     if (this.svgConf[i].moveable == true) {
       this.svgMoveables.push(
-        { "elem" : $("#"+this.svgConf[i].id), "timing" : this.svgConf[i].timing }
+        { "svg": this.svgConf[i], "elem" : $("#"+this.svgConf[i].id), "timing" : this.svgConf[i].timing }
       );
     }
     var svg = $("#"+this.svgConf[i].id);
@@ -90,15 +91,20 @@ CosmicEvo.prototype.setSvgs = function() {
   }
 };
 
-CosmicEvo.prototype.setTweens = function() {
+CosmicEvo.prototype.setTweens = function(){ 
   for (var i = 0; i < this.svgMoveables.length; i++) {
-    /*new ScrollMagic.Scene({
-          trigger: "#"+this.svgConf[i].id,
-          duration: 100,  // the scene should last for a scroll distance of 100px
-          offset: 50      // start this scene after scrolling for 50px
-      })
-      .setTween("#animate1", 0.5, { backgroundColor: "#ccc", scale: 2.5 })
-      .addIndicators({name: "1 (duration: 100)"})
-      .addTo(controller); */
+    
+    var scene = new ScrollMagic.Scene({
+      trigger: "#"+this.svgConf[i].id,
+      duration: 1000, 
+      offset: this.svgConf[i].y
+    });
+    
+    //for (var j = 1; j < this.svgMoveables[i].timing.length; j++) {
+      var timing =  this.svgMoveables[i].timing[1];
+      scene.setTween("#animate1", timing.t, { scale: 2.5, x: timing.x, y: timing.y });
+      scene.addIndicators({name: i+" (duration: "+timing.t+"})"});
+      scene.addTo(this.controller);
+    //}
   }
 };

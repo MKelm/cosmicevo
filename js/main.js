@@ -26,8 +26,8 @@ $(document).ready(function() {
         
     var ce = new CosmicEvo(controller);
     ce.setSvgs();
-    ce.detectScrollBarSize();
     ce.detectSvgScale();
-    ce.registerScrollHandler();
+    ce.setSvgs();
+    ce.setTweens();
     
 });
