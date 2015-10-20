@@ -1,4 +1,5 @@
 /* global ScrollMagic */
+/* global TimelineMax */
 var CosmicEvo = function(controller) {
   $.ajaxSetup( { "async": false } );
   var locationPath = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/')+1);
@@ -85,10 +86,11 @@ CosmicEvo.prototype.setSvg = function(svg) {
     '" style="position: absolute; top: '+svg.y * this.svgScale+
     '; left: '+svg.x * this.svgScale+'"> </object>'
   );
-  if (svg.moveable === true) {
+  if (typeof svg.moveable != "undefined" && svg.moveable !== false) {
     this.svgMoveables.push(
-      { "svg": svg, "elem" : $("#"+svg.id), "timing" : svg.timing }
+      { "svg": svg, "elem" : $("#"+svg.id), "start": svg.moveable, "timing" : svg.timing }
     );
+    var moveableStart = svg.moveable;
     for (var j = 0; j < svg.timing.length; j++) {
       if (j == 0 || j == svg.timing.length-1) {
         var colorClass = "";
@@ -98,7 +100,8 @@ CosmicEvo.prototype.setSvg = function(svg) {
           colorClass = "red";
         }
         $("body").append('<div class="trigger '+colorClass+'" id="trigger_'+svg.id+'" style="position: absolute; top: '+
-          svg.timing[j].y * this.svgScale +'px">trigger_'+svg.id+'</div>');
+          moveableStart * this.svgScale +'px">'+svg.id+' trigger_'+svg.id+'</div>');
+        moveableStart += svg.timing[j].t;
       }
     }
   }
@@ -125,23 +128,27 @@ CosmicEvo.prototype.setTweens = function(){
     
     var duration = 0;
     for (var j = 1; j < ma.timing.length; j++) {
-      duration += ma.timing[j].y - ma.timing[j-1].y;
+      duration += ma.timing[j].t;
     }
     
     var scene = new ScrollMagic.Scene({
+      triggerHook: 0,
       trigger: "#trigger_"+ma.svg.id,
-      duration: duration * this.svgScale, 
-      offset: 0
+      duration: duration * this.svgScale,
+      offset: ma.start * this.svgScale
     });
-
+    
+    var moveableX = this.svgMoveables[i].x, moveableY = this.svgMoveables[i].y;
+    var timeline = new TimelineMax();
     for (var j = 1; j < ma.timing.length; j++) {
       var timing = ma.timing[j];
-      scene.setTween(
-        "#"+ma.svg.id, timing.t, 
-        { x: timing.x * this.svgScale, y: timing.y * this.svgScale}
-      );
-      scene.addIndicators({name: i+" (duration: "+timing.t+"})"});
-      scene.addTo(this.controller);
+      moveableX += timing.x;
+      moveableY += timing.y;
+      timeline.to("#"+ma.svg.id, 1, {x: moveableX, y: moveableY});
+      //timing.t / this.svgScale, 
+      //scene.addIndicators({name: i+" (duration: "+timing.t * this.svgScale+"})"});
     }
+    scene.setTween(timeline);
+    scene.addTo(this.controller);
   }
 };
