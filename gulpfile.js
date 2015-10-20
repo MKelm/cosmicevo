@@ -2,44 +2,45 @@ var gulp = require('gulp');
 
 var fs = require('fs');
 
-var packageJson = JSON.parse(fs.readFileSync('./package.json'));
 var versionJson = JSON.parse(fs.readFileSync('./version.json'));
-
-var versionString = "";
 
 gulp.task('default', function() {
   
-    var exec = require('child_process').exec, child;
+    var packageJson = JSON.parse(fs.readFileSync('./package.json')),
+        exec = require('child_process').exec, child;
     
-    var cmd = "git rev-list --count HEAD && git describe --always";
+    var cmd = "git rev-list --count HEAD";
     child = exec(cmd,
       function (error, stdout, stderr) {
         //console.log('stdout: ' + stdout);
         if (stderr === "") {
-            var gitRevisionData = stdout.split("\n");
+            var gitRevisionData = stdout.split("\n"),
+                gitRevision = parseInt(gitRevisionData[0]);
             
-            var gitRevisionString = gitRevisionData[0] + " (" + gitRevisionData[1] + ")";
-            console.log("git-revision: " + gitRevisionString);
+            // version change if package file property has been changed
+            if (packageJson.version != versionJson.version) {
+                versionJson.version = packageJson.version;
+                versionJson.gitLastVersionRevision = gitRevision;
+            }
+            versionJson.gitVersionRevision = gitRevision - versionJson.gitLastVersionRevision;
             
-            versionJson.buildNumber = parseInt(versionJson.buildNumber);
-            if (gitRevisionString != versionJson.gitRevisionString) {
+            // build number change on every revision change
+            versionJson.buildNumber = versionJson.buildNumber;
+            if (gitRevision != versionJson.gitRevision) {
                 versionJson.buildNumber = 0;
             }
             versionJson.buildNumber++;
-
             
-            versionString = packageJson.version + "." + gitRevisionData[0] + "." + versionJson.buildNumber;
-            console.log("version: "  + versionString);
-            
-            versionJson.versionString = versionString;
-            versionJson.gitRevisionString = gitRevisionString;
+            // finally update revision property, version string and json
+            versionJson.gitRevision = gitRevision;
+            versionJson.versionString = packageJson.version + "." + versionJson.gitVersionRevision + "." + versionJson.buildNumber;
             fs.writeFileSync("version.json", JSON.stringify(versionJson));
-            
+
         } else {
             console.log('stderr: ' + stderr);
         }
         if (error !== null) {
-          console.log('exec error: ' + error);
+            console.log('exec error: ' + error);
         }
     });
     
