@@ -138,15 +138,16 @@ CosmicEvo.prototype.setTweens = function(){
       offset: ma.start * this.svgScale
     });
     
-    var moveableX = this.svgMoveables[i].x, moveableY = this.svgMoveables[i].y;
+    var moveableX = ma.svg.x, moveableY = ma.svg.y;
     var timeline = new TimelineMax();
     for (var j = 1; j < ma.timing.length; j++) {
       var timing = ma.timing[j];
       moveableX += timing.x;
       moveableY += timing.y;
-      timeline.to("#"+ma.svg.id, 1, {x: moveableX, y: moveableY});
+      timeline.to("#"+ma.svg.id, 1, { x: moveableX, y: moveableY });
+      console.log(timing, "#"+ma.svg.id, 1, { x: moveableX, y: moveableY });
       //timing.t / this.svgScale, 
-      //scene.addIndicators({name: i+" (duration: "+timing.t * this.svgScale+"})"});
+      scene.addIndicators({name: i+" (duration: "+timing.t+"})"});
     }
     scene.setTween(timeline);
     scene.addTo(this.controller);

@@ -16,8 +16,8 @@ body {
 	position: absolute;
 	left: 0;
 	display: block;
-	height: 2px;
-	border-bottom: 2px solid red;
+	height: 1px;
+	border-bottom: 1px solid red;
 	width: 100%;
 }
 .green {
